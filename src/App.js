@@ -1,123 +1,46 @@
-import React, { useState, useEffect } from 'react';
-import * as BABYLON from 'babylonjs';
+import React, { useEffect, useRef } from 'react';
+import { Engine, Scene, ArcRotateCamera, Vector3 } from '@babylonjs/core';
+import Homepage from './components/Homepage';
+import './App.css';
 
-const App = () => {
-  const [engine, setEngine] = useState(null); // State for Babylon.js engine
-  const [scene, setScene] = useState(null);   // State for Babylon.js scene
+function App() {
+  const canvasRef = useRef(null);
 
   useEffect(() => {
-    let canvas = document.getElementById('renderCanvas');
-    if (!canvas) {
-      canvas = recreateCanvas(); // Create canvas if not found
-    }
+    if (canvasRef.current) {
+      const engine = new Engine(canvasRef.current, true, {
+        adaptToDeviceRatio: true,
+        disableWebGL2Support: false,
+      });
 
-    const initializeEngine = async () => {
-      try {
-        if (engine) {
-          console.warn('Disposing previous engine...');
-          engine.dispose();
-          setEngine(null);
-        }
+      const scene = new Scene(engine);
 
-        // Clear WebGPU context
-        const webgpuContext = canvas.getContext('webgpu');
-        if (webgpuContext) {
-          webgpuContext.unconfigure();
-          console.log('Cleared WebGPU context.');
-        }
+      // Adding a camera to the scene
+      const camera = new ArcRotateCamera("camera1", Math.PI / 2, Math.PI / 4, 10, Vector3.Zero(), scene);
+      camera.attachControl(canvasRef.current, true);
 
-        const newEngine = new BABYLON.WebGPUEngine(canvas);
-        await newEngine.initAsync();
-        setEngine(newEngine);
+      // Add light, mesh, or other elements if needed
+      
+      engine.runRenderLoop(() => {
+        scene.render();
+      });
 
-        const newScene = createScene(newEngine, canvas);
-        setScene(newScene);
-        console.log('WebGPU engine and scene initialized.');
-      } catch (error) {
-        console.error('Error initializing Babylon.js engine:', error);
-      }
-    };
+      window.addEventListener('resize', () => {
+        engine.resize();
+      });
 
-    if (!engine) {
-      initializeEngine();
-    }
-
-    const handleResize = () => {
-      if (engine) {
-        engine.resize(); // Dynamically resize canvas
-        adjustCanvasSize(canvas); // Ensure canvas matches browser size
-      }
-    };
-
-    window.addEventListener('resize', handleResize);
-    adjustCanvasSize(canvas); // Initial adjustment on load
-
-    return () => {
-      // Cleanup on unmount
-      if (scene) {
-        scene.dispose();
-        setScene(null);
-      }
-
-      if (engine) {
+      return () => {
         engine.dispose();
-        setEngine(null);
-      }
-
-      const oldCanvas = document.getElementById('renderCanvas');
-      if (oldCanvas) {
-        oldCanvas.parentNode.removeChild(oldCanvas);
-      }
-
-      window.removeEventListener('resize', handleResize); // Cleanup resize listener
-    };
-  }, []); // Only run once on mount
-
-  const recreateCanvas = () => {
-    const existingCanvas = document.getElementById('renderCanvas');
-    if (existingCanvas) {
-      existingCanvas.parentNode.removeChild(existingCanvas);
+      };
     }
+  }, []);
 
-    const newCanvas = document.createElement('canvas');
-    newCanvas.id = 'renderCanvas';
-    newCanvas.style.position = 'absolute';
-    newCanvas.style.top = '0';
-    newCanvas.style.left = '0';
-    newCanvas.style.width = '100%';
-    newCanvas.style.height = '100%';
-    document.body.appendChild(newCanvas);
-    return newCanvas;
-  };
-
-  const adjustCanvasSize = (canvas) => {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-  };
-
-  const createScene = (engine, canvas) => {
-    const newScene = new BABYLON.Scene(engine);
-    const camera = new BABYLON.ArcRotateCamera(
-      'Camera',
-      Math.PI / 2,
-      Math.PI / 4,
-      4,
-      BABYLON.Vector3.Zero(),
-      newScene
-    );
-    camera.attachControl(canvas, true);
-
-    new BABYLON.HemisphericLight('light', new BABYLON.Vector3(1, 1, 0), newScene);
-    BABYLON.MeshBuilder.CreateSphere('sphere', { diameter: 2 }, newScene);
-
-    engine.runRenderLoop(() => {
-      newScene.render();
-    });
-
-    return newScene;
-  };
-
-  return <canvas id="renderCanvas" />;
-};
+  return (
+    <div className="App">
+      <canvas ref={canvasRef} style={{ width: '100%', height: '100vh' }} />
+      <Homepage />
+    </div>
+  );
+}
 
 export default App;
