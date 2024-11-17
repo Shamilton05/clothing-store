@@ -1,0 +1,57 @@
+/* Header Styles */
+.BabylonHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.25em; /* 20px converted to em */
+    background-color: transparent;
+    position: absolute;
+    width: 100%;
+    top: 0;
+    z-index: 10; /* Ensure the header stays on top of other elements */
+    box-sizing: border-box;
+    flex-wrap: wrap; /* Allows items to move to the next line if there's not enough space */
+}
+  
+.logo {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #fff;
+    flex-shrink: 0; /* Prevent logo from shrinking */
+    text-decoration: none;
+}
+  
+.nav-links {
+    display: flex;
+    gap: 1.25em; /* 20px converted to em */
+    flex-wrap: wrap; /* Allows links to wrap if there isn't enough space */
+}
+
+.account-links {
+    display: flex;
+    gap: 1.875em; /* 30px converted to em */
+    align-items: center;
+    font-size: 1rem; /* Uniform text size */
+}
+
+.nav-links a,
+.account-links a {
+    text-decoration: none;
+    color: #fff;
+    font-weight: 500;
+    white-space: nowrap; /* Prevents text from breaking */
+}
+
+.shopping-cart-link {
+    display: flex;
+    align-items: center;
+    gap: 0.5em; /* Space between icon and text */
+    color: #fff;
+    text-decoration: none;
+}
+  
+.shopping-cart-icon {
+    font-size: 1.2rem; /* Adjust icon size */
+    position: relative;
+    top: -0.1em; /* Move icon up slightly, scales with font size */
+}
